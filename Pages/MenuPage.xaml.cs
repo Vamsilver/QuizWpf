@@ -21,9 +21,6 @@ namespace QuizWpf.Pages
     /// </summary>
     public partial class MenuPage : Page
     {
-        int Lifes = 5;
-        public int Pointer = 0;
-
         List<int> SequenceOfQuestions;
 
         public MenuPage()
@@ -36,10 +33,18 @@ namespace QuizWpf.Pages
             NavigationService.Navigate(new AddQuestionPage());
         }
 
-        private void PlayBtnClick(object sender, RoutedEventArgs e)
+        private void PlayNormalBtnClick(object sender, RoutedEventArgs e)
         {
             SequenceOfQuestions = (List<int>)RandomStirrer.RandomShuffle(Enumerable.Range(0, MongoDbConnection.GetQuantity()));
-            NavigationService.Navigate(new GamePage(Lifes, SequenceOfQuestions, Pointer));
+
+            NavigationService.Navigate(new GamePage(5, SequenceOfQuestions, 0, Core.Complexity.Normal));
+        }
+
+        private void PlayHardBtnClick(object sender, RoutedEventArgs e)
+        {
+            SequenceOfQuestions = (List<int>)RandomStirrer.RandomShuffle(Enumerable.Range(0, MongoDbConnection.GetQuantity()));
+
+            NavigationService.Navigate(new GamePage(3, SequenceOfQuestions, 0, Core.Complexity.Hard));
         }
     }
 }

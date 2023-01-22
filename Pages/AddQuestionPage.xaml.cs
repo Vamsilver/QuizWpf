@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,6 +31,11 @@ namespace QuizWpf.Pages
             if (AnswerTextBox.Text.Length > 40)
             {
                 MessageBox.Show("Ответ превышет допустимую длину!");
+                return;
+            }
+            else if (Regex.IsMatch(AnswerTextBox.Text, @"\P{IsCyrillic}"))
+            {
+                MessageBox.Show("Ответ может состоять только из кириллицы!");
                 return;
             }
             else

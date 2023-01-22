@@ -10,7 +10,10 @@
 
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button x:Name="PlayBtn" Content="ИГРАТЬ" Margin="0,0,0,10" FontSize="34" Click="PlayBtnClick"></Button>
+            <TextBlock Text="ИГРАТЬ" FontSize="34" Margin="0,0,0,10" TextAlignment="Center"/>
+            <Button x:Name="PlayNormalBtn" Content="НОРМАЛЬНАЯ" Margin="0,0,0,10" FontSize="34" Click="PlayNormalBtnClick"></Button>
+            <Button x:Name="PlayHardBtn" Content="ХАРДКОР" Margin="0,0,0,10" FontSize="34" Click="PlayHardBtnClick"></Button>
+            <TextBlock Text="ДОП ФУНКЦИИ" FontSize="34" Margin="0,0,0,10" TextAlignment="Center"/>
             <Button x:Name="CreateQuestion" Content="СОЗДАТЬ НОВЫЙ ВОПРОС" FontSize="34" Click="CreateQuestionClick"></Button>
         </StackPanel>
     </Grid>

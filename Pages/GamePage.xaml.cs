@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using QuizWpf.Core;
 
 namespace QuizWpf.Pages
@@ -23,29 +24,31 @@ namespace QuizWpf.Pages
         char[] letters = new char[40];
         int Count = 0;
         int NumberOfHints = 2;
+        DispatcherTimer timer = new DispatcherTimer();
 
+        Core.Complexity Complexity;
         int Lifes;
         Question CurrentQuestion;
         List<int> Sequence;
         int Pointer;
 
-        public GamePage(int lifes, List<int> sequence, int pointer)
+        public GamePage(int lifes, List<int> sequence, int pointer, Complexity complexity)
         {
-            if(pointer == 9)
-            {
-                MessageBox.Show("ПОЗДРАВЛЕЯМ ВЫ ПОБЕДИЛИ!");
-                NavigationService.Navigate(new MenuPage());
-            }
             InitializeComponent();
 
             Lifes = lifes;
-
             Pointer = pointer;
             Sequence = sequence;
-            CurrentQuestion = MongoDbConnection.Find(Pointer);
-            Pointer++;
+            Complexity = complexity;
+            CurrentQuestion = MongoDbConnection.Find(Sequence.ElementAt(Pointer));
             QuestionTextBlock.Text = CurrentQuestion.Quaere;
             LifesTextBlock.Text = Lifes.ToString();
+            AnswerCountTextBlock.Text = Pointer.ToString();
+
+            Pointer++;
+
+            if (Complexity == Complexity.Normal)
+                Timer.Content = "";
 
             AddAnswerButtons();
             FillLettersArray();
@@ -59,13 +62,16 @@ namespace QuizWpf.Pages
 
         private void LetterButtonClick(object sender, RoutedEventArgs e)
         {
-            UsedButtons.Add(sender as Button);
-            Answer[Count] = (sender as Button).Content.ToString().ToCharArray()[0];
-            Count++;
+            if (Count < CurrentQuestion.Answer.Length)
+            {
+                UsedButtons.Add(sender as Button);
+                Answer[Count] = (sender as Button).Content.ToString().ToCharArray()[0];
+                Count++;
 
-            (sender as Button).IsEnabled = false;
+                (sender as Button).IsEnabled = false;
 
-            UpdateAnswersBtns();
+                UpdateAnswersBtns();
+            }
         }
 
         private void CheckClick(object sender, RoutedEventArgs e)
@@ -75,13 +81,18 @@ namespace QuizWpf.Pages
 
             if (Enumerable.SequenceEqual(me, re))
             {
-                if (Lifes < 5)
+                if (Pointer == 10)
                 {
-                    Lifes++;
-                    LifesTextBlock.Text = Lifes.ToString();
+                    MessageBox.Show("ПОЗДРАВЛЯЕМ ВЫ ПОБЕДИЛИ!");
+                    timer.Stop();
+                    NavigationService.Navigate(new MenuPage());
                 }
-
-                NavigationService.Navigate(new GamePage(Lifes, Sequence, Pointer));
+                else
+                {
+                    if (Complexity == Complexity.Hard)
+                        timer.Stop();
+                    NavigationService.Navigate(new GamePage(Lifes, Sequence, Pointer, Complexity));
+                }
             }
             else
             {
@@ -94,7 +105,8 @@ namespace QuizWpf.Pages
                 else
                 {
                     MessageBox.Show("Вы проиграли, попробуйте еще раз!");
-                    NavigationService.GoBack();
+                    timer.Stop();
+                    NavigationService.Navigate(new MenuPage());
                 }
             }
         }
@@ -212,6 +224,39 @@ namespace QuizWpf.Pages
                 {
                     letters[i] = (char)random.Next('А', 'Я');
                 }
+            }
+        }
+
+        private void GamePageLoaded(object sender, RoutedEventArgs e)
+        {
+            int TotalSeconds = 90;
+            if (Complexity == Complexity.Hard)
+            {
+                timer.Interval = TimeSpan.FromSeconds(1);
+                timer.Tick += (object? sender, EventArgs e) => 
+                {
+                    TotalSeconds--;
+                    Timer.Content = (TotalSeconds / 60).ToString() + ":" + ((TotalSeconds < 10)? "0" : "") + (TotalSeconds % 60).ToString();
+                    if(TotalSeconds == 0)
+                    {
+                        if(MessageBox.Show("Будте быстрее!", "Закончилось время", MessageBoxButton.OK) == MessageBoxResult.OK)
+                        {
+                            Lifes--;
+                            timer.Stop();
+                            NavigationService.Navigate(new GamePage(Lifes, Sequence, Pointer, Complexity));
+                        }
+                    }
+                };
+                timer.Start();
+            }
+        }
+
+        private void SurrenderClick(object sender, RoutedEventArgs e)
+        {
+            if(MessageBox.Show("Вы уверенны?", "Подвердите поражение", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                timer.Stop();
+                NavigationService.Navigate(new MenuPage());
             }
         }
     }

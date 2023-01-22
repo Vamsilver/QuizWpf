@@ -12,6 +12,7 @@ namespace QuizWpf.Core
         {
             var random = new Random();
             var shuffle = new List<T>(list);
+
             for (var i = 2; i < shuffle.Count; ++i)
             {
                 var temp = shuffle[i];
