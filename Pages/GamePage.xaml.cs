@@ -236,7 +236,7 @@ namespace QuizWpf.Pages
                 timer.Tick += (object? sender, EventArgs e) => 
                 {
                     TotalSeconds--;
-                    Timer.Content = (TotalSeconds / 60).ToString() + ":" + ((TotalSeconds < 10)? "0" : "") + (TotalSeconds % 60).ToString();
+                    Timer.Content = (TotalSeconds / 60).ToString() + ":" + ((TotalSeconds % 60 < 10)? "0" : "") + (TotalSeconds % 60).ToString();
                     if(TotalSeconds == 0)
                     {
                         if(MessageBox.Show("Будте быстрее!", "Закончилось время", MessageBoxButton.OK) == MessageBoxResult.OK)
